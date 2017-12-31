@@ -144,3 +144,9 @@ Functions of ssh-csr
  * Read ~/.ssh/id\_rsa.pub (or another configured identity) and write the key to ssh-ca's standard input
  * Close the write stream
  * Read the signed certificate from ssh-ca's standard output and write it to ~/ssh.id\_rsa-cert.pub (or another configured itentity)
+
+
+Functions of `sudo`
+-------------------
+
+Permit users of the `sshca` group to sign keys while preventing direct access to the CA keys.
