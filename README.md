@@ -84,6 +84,17 @@ This CA is made by a Linux system administrator for Linux system
 administrators. It leverages facilities of a mostly vanilla Debian/Ubuntu
 system to reduce on programming and maintenance.
 
+The user doesn't invoke `ssh-ca` directly. When an ssh connection
+is established to the server and the client authenticates as a user
+other than root, the SSH server loads `/usr/sbin/sudo -u sshca
+/usr/local/bin/ssh-ca` as a forced command. The `ssh-ca` process can
+read the `SSH_ORIGINAL_COMMAND` environment variable and take different
+actions according to the command parameters passed by the ssh client.
+
+When the command parameters contain an SSH certificate signature
+subcommand, a public key is expected on standard input then an SSH
+certificate is written to standard output and the connection is closed.
+
 
 Functions of the Ansible playbook
 ---------------------------------
