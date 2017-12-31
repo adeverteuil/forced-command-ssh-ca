@@ -31,14 +31,15 @@ function sign_user_key() {
     serial="$(date +%s)"
     validity="${SSH_CA_CERTIFICATE_VALIDITY}"
     if [ -n "${SSH_CA_CERTIFICATE_OPTIONS}" ]; then
-        options="-O ${SSH_CA_CERTIFICATE_OPTIONS}"
+        options=" -O ${SSH_CA_CERTIFICATE_OPTIONS}"
+    else
+        options=""
     fi
     log_output ssh-keygen \
         -P "" \
         -s "/usr/local/lib/ssh-ca/${SSH_CA_KEY}" \
         -I "${user_id}" \
-        ${options} \
-        -V "${validity}" \
+        -V "${validity}"${options} \
         -n "${principals}" \
         -z "${serial}" \
         "${pubkey}"
