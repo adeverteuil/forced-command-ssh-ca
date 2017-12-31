@@ -1,10 +1,6 @@
 ---
 - hosts: ssh-ca
 
-  vars_files:
-    - vars.yml
-    - vault.yml
-
   tasks:
 
     - name: activate NTP
@@ -12,19 +8,24 @@
         name: ntp
         state: present
 
+    - name: create the sshca group
+      group:
+        name: sshca
+
     - name: create users
       user:
         name: "{{ item.name }}"
         comment: "{{ item.comment|default(omit) }}"
+        groups: sshca
       with_items: "{{ ssh_ca_users }}"
 
     - name: provision authorized SSH keys for users
       authorized_key:
-        user: "{{ item.0 }}"
+        user: "{{ item.0.name }}"
         key: "{{ item.1.key }}"
         comment: "{{ item.1.comment|default(omit) }}"
-        key_options: restrict,command="/usr/local/bin/ssh-ca
-        state: "{{ item.1.state|default("present") }}"
+        key_options: command="/usr/local/bin/ssh-ca",no-agent-forwarding,no-X11-forwarding,no-port-forwarding,no-user-rc
+        state: "{{ item.1.state|default('present') }}"
       with_subelements:
         - "{{ ssh_ca_users }}"
         - ssh_keys
@@ -33,7 +34,8 @@
       copy:
         src: ssh-ca
         dest: /usr/local/bin/ssh-ca
-        mode: 0755
+        group: sshca
+        mode: 0750
 
     - name: configure ssh-ca
       template:
@@ -44,30 +46,43 @@
       template:
         src: sshd_config.j2
         dest: /etc/ssh/sshd_config
-      notify: restart sshd
+      notify: restart ssh
 
     - name: create the CA directory
       file:
-        dest: /root/ssh-ca
+        dest: /usr/local/lib/ssh-ca
         state: directory
-        mode: 0700
+        group: sshca
+        mode: 0750
 
     - name: install CA secret keys
       copy:
         content: "{{ item.secret }}"
-        dest: /root/ssh-ca/ca-{{ item.name }}"
-        mode: 0600
+        dest: /usr/local/lib/ssh-ca/{{ item.name }}
+        group: sshca
+        mode: 0640
       with_items: "{{ ssh_ca_keypairs }}"
+      no_log: True
 
     - name: install CA public keys
       copy:
         content: "{{ item.public }}"
-        dest: /root/ssh-ca/ca-{{ item.name }}.pub
+        dest: /usr/local/lib/ssh-ca/{{ item.name }}.pub
+        group: sshca
+        mode: 0640
       with_items: "{{ ssh_ca_keypairs }}"
+      no_log: True
+
+    - name: create the log directory
+      file:
+        dest: /var/log/ssh-ca
+        state: directory
+        group: sshca
+        mode: 0770
 
   handlers:
 
-    - name: restart sshd
+    - name: restart ssh
       service:
-        name: sshd
+        name: ssh
         state: restarted

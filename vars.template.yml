@@ -1,3 +1,4 @@
+# vi: nowrap
 ---
 ssh_ca_users:
   - name: adeverteuil  # Valid POSIX username
