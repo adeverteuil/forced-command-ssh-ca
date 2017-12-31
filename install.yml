@@ -16,7 +16,7 @@
       user:
         name: "{{ item.name }}"
         comment: "{{ item.comment|default(omit) }}"
-        groups: sshca
+        group: sshca
       with_items: "{{ ssh_ca_users }}"
 
     - name: provision authorized SSH keys for users

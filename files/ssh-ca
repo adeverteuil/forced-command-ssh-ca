@@ -3,6 +3,7 @@
 # ssh-ca
 
 . /etc/ssh-ca.conf
+umask 0007
 
 function log_debug() {
     echo "$(date "+%F %T") CALL ${*}" >> /var/log/ssh-ca/debug.log
