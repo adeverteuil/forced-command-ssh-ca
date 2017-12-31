@@ -13,6 +13,10 @@ ssh_ca_superuser_authorized_keys:
   - key: ssh-rsa AAAAB3NzaC1yc2E......N30aU+jIn adeverteuil@work-laptop
     state: absent  # Remove this old SSH key
 
+# The principal name for the host certificate, must match the SSH server
+# hostname users will connect with.
+ssh_ca_principal: my-ca.example.invalid
+
 # You better define this variable in an Ansible Vault
 ssh_ca_keypairs:
   - name: iweb-sc-01

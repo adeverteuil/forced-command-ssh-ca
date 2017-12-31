@@ -102,15 +102,23 @@
         group: sshca
         mode: 0750
 
+    - name: find all the host keys
+      command: sed -n '/^HostKey/s/^HostKey *//p' /etc/ssh/sshd_config
+      register: host_keys
+      check_mode: no
+
     - name: sign the host keys
       command: ssh-keygen -s "/usr/local/lib/ssh-ca/{{ ssh_ca_configuration.use_ca_key }}"
         -h
         -P ""
         -I "{{ ssh_ca_configuration.use_ca_key }}"
+        -V "-1h:+365d"
         -n "{{ ansible_fqdn }}"
-        /etc/ssh/ssh_host_rsa_key.pub
+        "{{ item }}.pub"
       args:
-        creates: /etc/ssh/ssh_host_rsa_key-cert.pub
+        creates: "{{ item }}-cert.pub"
+      with_items: "{{ host_keys.stdout_lines }}"
+      notify: restart ssh
 
   handlers:
 

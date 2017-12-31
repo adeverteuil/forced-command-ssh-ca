@@ -13,10 +13,6 @@
 #
 # How to use
 #
-#     In your ~/.ssh/config file, define a Host ssh-ca and specify the
-#     HostName, User, Identity, etc. of your CA. Request help from your
-#     CA administrator for the correct values.
-#
 #     To tell ssh-csr what public key to send, define the
 #     SSH_CSR_IDENTITY environment variable in your .bashrc. If you
 #     don't define it, $HOME/.ssh/id_rsa.pub will be used by default.
@@ -30,6 +26,17 @@
 #
 #     Remain attentive to your CA administrator for @revoked lines to
 #     add and @cert-authority lines to remove or add.
+#
+#     In your ~/.ssh/config file, define a Host ssh-ca and specify the
+#     HostName, User, Identity, etc. of your CA. Request help from your
+#     CA administrator for the correct values.
+#
+#     Test your config and known_hosts with "ssh ssh-ca config"
+#     In the debug output, you should see:
+#
+#         debug1: Server host certificate: ecdsa-sha2…
+#         debug1: Host 'ssh-ca.example.com' is known and matches the ECDSA-CERT host certificate.
+#         debug1: Found CA key in /home/adeverteuil/.ssh/known_hosts:76
 #
 #     Copy ssh-csr to your $PATH, such as ~/bin or /usr/local/bin.
 #
