@@ -1,0 +1,5 @@
+# {{ ansible_managed }}
+{% set config = ssh_ca_configuration %}
+SSH_CA_KEY="{{ config.use_ca_key }}"
+SSH_CA_CERTIFICATE_VALIDITY="{{ config.certificate_validity }}"
+SSH_CA_CERTIFICATE_OPTIONS="{{ config.certificate_options|default("") }}"

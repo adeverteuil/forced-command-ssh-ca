@@ -1,0 +1,26 @@
+---
+ssh_ca_users:
+  - name: adeverteuil  # Valid POSIX username
+    comment: Alexandre de Verteuil
+    ssh_keys:
+      - key: ecdsa-sha2-nistp256 AAAAE2VjZHNh......2zt4HI= adeverteuil@work-laptop
+      - key: ssh-rsa AAAAB3NzaC1yc2E......N30aU+jIn adeverteuil@work-laptop
+        state: absent  # Remove this old SSH key
+
+# You better define this variable in an Ansible Vault
+ssh_ca_keypairs:
+  - name: iweb-sc-01
+    secret: |
+      -----BEGIN RSA PRIVATE KEY-----
+      MIIEowIBAAKCAQEAwpQh5AdhGSK5/yHjkjjBAT6tdMjeOapLUVUymiEeIxIc2GaI
+      3ivZ8ZaXX7WzbvSX8vXLw5DzpOHz+oa4gfUyKPePKv/WBKVP5qJrVY2R6AWINowL
+      [...]
+      dUBJmynMHRW1DicDedfkjBBQN2y/EOYYjX1nhLyNxPYCaL4fphc+kKHcY3bYubUq
+      UNB7VFkSAv6FEwFyWJKUlxfPX64btbIVXC71xdZrFkWX9Pwv06gc
+      -----END RSA PRIVATE KEY-----
+    public: ssh-rsa AAAAB3NzaC1yc.....TUHN65v iweb-sc-01
+
+ssh_ca_configuration:
+  use_ca_key: iweb-sc-01  # The name of an ssh_ca_keypairs item
+  certificate_validity: "-10m:+10m"  # -V option for key signing
+  certificate_options:  # Options to add to the signed certificates, if any

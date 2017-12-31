@@ -1,0 +1,64 @@
+---
+- hosts: ssh-ca
+  vars_files:
+    - vars.yml
+    - vault.yml
+  tasks:
+
+  - name: activate NTP
+    apt:
+      name: ntp
+      state: present
+
+  - name: create users
+    user:
+      name: "{{ item.name }}"
+      comment: "{{ item.comment|default(omit) }}"
+    with_items: "{{ ssh_ca_users }}"
+
+  - name: provision authorized SSH keys for users
+    authorized_key:
+      user: "{{ item.0 }}"
+      key: "{{ item.1.key }}"
+      comment: "{{ item.1.comment|default(omit) }}"
+      key_options: restrict,command="/usr/local/bin/ssh-ca
+      state: "{{ item.1.state|default("present") }}"
+    with_subelements:
+      - "{{ ssh_ca_users }}"
+      - ssh_keys
+
+  - name: install ssh-ca
+    copy:
+      src: ssh-ca
+      dest: /usr/local/bin/ssh-ca
+      mode: 0755
+
+  - name: configure ssh-ca
+    template:
+      src: ssh-ca.conf.j2
+      dest: /etc/ssh-ca.conf
+
+  - name: configure sshd
+    template:
+      src: sshd_config.j2
+      dest: /etc/ssh/sshd_config
+    notify: restart sshd
+
+  - name: create the CA directory
+    file:
+      dest: /root/ssh-ca
+      state: directory
+      mode: 0700
+
+  - name: install CA secret keys
+    copy:
+      content: "{{ item.secret }}"
+      dest: /root/ssh-ca/ca-{{ item.name }}"
+      mode: 0600
+    with_items: "{{ ssh_ca_keypairs }}"
+
+  - name: install CA public keys
+    copy:
+      content: "{{ item.public }}"
+      dest: /root/ssh-ca/ca-{{ item.name }}.pub
+    with_items: "{{ ssh_ca_keypairs }}"

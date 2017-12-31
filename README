@@ -1,0 +1,33 @@
+Configuration management
+========================
+
+Which inventory to use
+----------------------
+
+
+
+How to remove a user's key
+--------------------------
+
+Do not remove a user's SSH key by deleting its item from the list. This
+will simply stop Ansible from managing this key and would leave it
+present on the CA server. Rather, add the "state:" key with the value
+"absent". Then run the next install.yml playbook run will actually
+remove the SSH key from the user's authorized_keys file.
+
+
+How to create SSH keypairs for the ssh_ca_keypairs variable
+-----------------------------------------------------------
+
+On your workstation, use ssh-keygen to generate a keypair.
+
+  ssh-keygen -C iweb-sc-01 -f iweb-sc-01
+
+  -C iweb-sc-01
+      Set the key's comment to "iweb-sc-01".
+      By convention, 01 is the key's sequence number. Thus you can provision multiple
+      keys in advance to facilitate key rotation.
+  -f
+      Provide the output filename. The public part will have .pub appended to the name.
+
+Then copy the content of the files to the secret and public keys of a new list item.
