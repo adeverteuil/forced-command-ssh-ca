@@ -1,0 +1,70 @@
+#!/bin/bash
+#
+# ssh-csr 1.0
+#
+#     A client program for forced-command-ssh-ca.
+#
+#     ssh-csr establishes an SSH session with ssh-ca, specifies the
+#     request is for a user certificate and what principals the
+#     request is for, sends the public key from the file specified in
+#     the SSH_CSR_IDENTITY environment variable, receives a signed
+#     certificate valid for the requested principals, and writes it in a
+#     file with the -cert.pub suffix.
+#
+# How to use
+#
+#     In your ~/.ssh/config file, define a Host ssh-ca and specify the
+#     HostName, User, Identity, etc. of your CA. Request help from your
+#     CA administrator for the correct values.
+#
+#     To tell ssh-csr what public key to send, define the
+#     SSH_CSR_IDENTITY environment variable in your .bashrc. If you
+#     don't define it, $HOME/.ssh/id_rsa.pub will be used by default.
+#
+#     Add the certificate authority to your known_hosts file. You can
+#     do so by adding a line in your ~/.ssh/known_hosts:
+#
+#         @cert-authority * ssh-rsa AAAAB5W...
+#
+#     Ask your CA administrator what's your @cert-authority.
+#
+#     Remain attentive to your CA administrator for @revoked lines to
+#     add and @cert-authority lines to remove or add.
+#
+#     Copy ssh-csr to your $PATH, such as ~/bin or /usr/local/bin.
+#
+#     Request a certificate by calling ssh-csr with the comma-separated
+#     list of principals to include in your certificate.
+#
+#     For example:
+#         $ ssh-csr principal1,principal2
+#         /home/adeverteuil/.ssh/id_rsa-cert.pub:
+#                 Type: ssh-rsa-cert-v01@openssh.com user certificate
+#                 Public key: RSA-CERT SHA256:bh/6eKMulLfWwdrfR+S9OegfNjHiHeEoa3tFzpRq4bQ
+#                 Signing CA: RSA SHA256:vrAgOA20VjUdXkfQYcEdJV1qlKYqp6A67wQ5IK+0pkk
+#                 Key ID: "adeverteuil"
+#                 Serial: 1514748458
+#                 Valid: from 2017-12-31T14:17:38 to 2017-12-31T14:37:38
+#                 Principals: 
+#                         principal1
+#                         principal2
+#                 Critical Options: (none)
+#                 Extensions: 
+#                         permit-X11-forwarding
+#                         permit-agent-forwarding
+#                         permit-port-forwarding
+#                         permit-pty
+#                         permit-user-rc
+
+identity="${SSH_CSR_IDENTITY:-$HOME/.ssh/id_rsa.pub}"
+cert="${identity%.pub}-cert.pub"
+
+output="$(ssh ssh-ca user "${1}" <"${identity}" 2>&1)"
+rc=$?
+
+if [ ${rc} -eq 0 ]; then
+    echo "${output}" > "${cert}"
+    ssh-keygen -L -f "${cert}"
+else
+    echo "${output}"
+fi
