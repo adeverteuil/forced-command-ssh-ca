@@ -3,10 +3,13 @@
 
   tasks:
 
-    - name: activate NTP
+    - name: install required packages
       apt:
-        name: ntp
+        name: "{{ item }}"
         state: present
+      with_items:
+        - ntp
+        - uuid
 
     - name: create the sshca user
       user:
@@ -35,6 +38,14 @@
         src: sudoers-sshca
         dest: /etc/sudoers.d/sshca
         mode: 0440
+
+    - name: provision superuser SSH keys
+      authorized_key:
+        user: root
+        key: "{{ item.key }}"
+        state: "{{ item.state|default('present') }}"
+        comment: "{{ item.comment|default('omit') }}"
+      with_items: "{{ ssh_ca_superuser_authorized_keys }}"
 
     - name: install ssh-ca
       copy:

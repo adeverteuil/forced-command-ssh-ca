@@ -4,10 +4,17 @@
 
 . /etc/ssh-ca.conf
 
+run_id="$(uuid)"
+user_id="${SUDO_USER:-$USER}"
+
 function log_debug() {
-    echo "$(date "+%F %T") CALL ${*}" >> /var/log/ssh-ca/debug.log
+    echo "$(date "+%F %T") ${run_id} ${*}" >> /var/log/ssh-ca/debug.log
+}
+
+function log_output() {
+    log_debug "CALL ${*}"
     output="$("${@}" 2>&1)"
-    echo "$(date "+%F %T") OUTPUT ${output}" >> /var/log/ssh-ca/debug.log
+    log_debug "OUTPUT ${output}"
 }
 
 function log_certificate() {
@@ -17,7 +24,7 @@ function log_certificate() {
 function sign_user_key() {
     mkdir -p /tmp/ssh-ca
     principals="${SSH_ORIGINAL_COMMAND#* }"
-    pubkey="$(mktemp /tmp/ssh-ca/${USER}_XXXXX.pub)"
+    pubkey="$(mktemp /tmp/ssh-ca/${user_id}_XXXXX.pub)"
     cert="${pubkey%.pub}-cert.pub"
     cat > "${pubkey}"
     ca_key="/usr/local/lib/ssh-ca/${SSH_CA_KEY}"
@@ -26,10 +33,10 @@ function sign_user_key() {
     if [ -n "${SSH_CA_CERTIFICATE_OPTIONS}" ]; then
         options="-O ${SSH_CA_CERTIFICATE_OPTIONS}"
     fi
-    log_debug ssh-keygen \
+    log_output ssh-keygen \
         -P "" \
         -s "/usr/local/lib/ssh-ca/${SSH_CA_KEY}" \
-        -I "${USER}" \
+        -I "${user_id}" \
         ${options} \
         -V "${validity}" \
         -n "${principals}" \
@@ -44,12 +51,12 @@ function sign_user_key() {
 function sign_host_key() {
     mkdir -p /tmp/ssh-ca
     principals="${SSH_ORIGINAL_COMMAND#* }"
-    pubkey="$(mktemp /tmp/ssh-ca/${USER}_XXXXX.pub)"
+    pubkey="$(mktemp /tmp/ssh-ca/${user_id}_XXXXX.pub)"
     cert="${pubkey%.pub}-cert.pub"
     cat > "${pubkey}"
     ca_key="/usr/local/lib/ssh-ca/${SSH_CA_KEY}"
     validity="+365d"
-    log_debug ssh-keygen \
+    log_output ssh-keygen \
         -P "" \
         -s "/usr/local/lib/ssh-ca/${SSH_CA_KEY}" \
         -h \
@@ -63,7 +70,7 @@ function sign_host_key() {
     rm "${cert}"
 }
 
-echo "SSH_ORIGINAL_COMMAND=${SSH_ORIGINAL_COMMAND}" >> /var/log/ssh-ca/debug.log
+log_debug "SSH_ORIGINAL_COMMAND ${SSH_ORIGINAL_COMMAND}"
 subcommand=${SSH_ORIGINAL_COMMAND% *}
 case "${subcommand}" in
     user)
@@ -74,7 +81,7 @@ case "${subcommand}" in
         ;;
     config)
         echo SSH_ORIGINAL_COMMAND=$SSH_ORIGINAL_COMMAND
-        echo USER=$USER
+        echo USER=$user_id
         echo SSH_CA_KEY=$SSH_CA_KEY
         echo SSH_CA_CERTIFICATE_VALIDITY=$SSH_CA_CERTIFICATE_VALIDITY
         echo SSH_CA_CERTIFICATE_OPTIONS=$SSH_CA_CERTIFICATE_OPTIONS

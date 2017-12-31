@@ -8,6 +8,11 @@ ssh_ca_users:
       - key: ssh-rsa AAAAB3NzaC1yc2E......N30aU+jIn adeverteuil@work-laptop
         state: absent  # Remove this old SSH key
 
+ssh_ca_superuser_authorized_keys:
+  - key: ecdsa-sha2-nistp256 AAAAE2VjZHNh......2zt4HI= adeverteuil@work-laptop
+  - key: ssh-rsa AAAAB3NzaC1yc2E......N30aU+jIn adeverteuil@work-laptop
+    state: absent  # Remove this old SSH key
+
 # You better define this variable in an Ansible Vault
 ssh_ca_keypairs:
   - name: iweb-sc-01
