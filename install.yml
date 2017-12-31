@@ -8,15 +8,16 @@
         name: ntp
         state: present
 
-    - name: create the sshca group
-      group:
+    - name: create the sshca user
+      user:
         name: sshca
+        system: yes
 
     - name: create users
       user:
         name: "{{ item.name }}"
         comment: "{{ item.comment|default(omit) }}"
-        group: sshca
+        groups: sshca
       with_items: "{{ ssh_ca_users }}"
 
     - name: provision authorized SSH keys for users
@@ -24,16 +25,22 @@
         user: "{{ item.0.name }}"
         key: "{{ item.1.key }}"
         comment: "{{ item.1.comment|default(omit) }}"
-        key_options: command="/usr/local/bin/ssh-ca",no-agent-forwarding,no-X11-forwarding,no-port-forwarding,no-user-rc
         state: "{{ item.1.state|default('present') }}"
       with_subelements:
         - "{{ ssh_ca_users }}"
         - ssh_keys
 
+    - name: add the sshca group to the sudoers for the forced command
+      copy:
+        src: sudoers-sshca
+        dest: /etc/sudoers.d/sshca
+        mode: 0440
+
     - name: install ssh-ca
       copy:
         src: ssh-ca
         dest: /usr/local/bin/ssh-ca
+        owner: sshca
         group: sshca
         mode: 0750
 
@@ -52,6 +59,7 @@
       file:
         dest: /usr/local/lib/ssh-ca
         state: directory
+        owner: sshca
         group: sshca
         mode: 0750
 
@@ -59,8 +67,9 @@
       copy:
         content: "{{ item.secret }}"
         dest: /usr/local/lib/ssh-ca/{{ item.name }}
+        owner: sshca
         group: sshca
-        mode: 0640
+        mode: 0600
       with_items: "{{ ssh_ca_keypairs }}"
       no_log: True
 
@@ -68,6 +77,7 @@
       copy:
         content: "{{ item.public }}"
         dest: /usr/local/lib/ssh-ca/{{ item.name }}.pub
+        owner: sshca
         group: sshca
         mode: 0640
       with_items: "{{ ssh_ca_keypairs }}"
@@ -77,8 +87,19 @@
       file:
         dest: /var/log/ssh-ca
         state: directory
+        owner: sshca
         group: sshca
-        mode: 0770
+        mode: 0750
+
+    - name: sign the host keys
+      command: ssh-keygen -s "/usr/local/lib/ssh-ca/{{ ssh_ca_configuration.use_ca_key }}"
+        -h
+        -P ""
+        -I "{{ ssh_ca_configuration.use_ca_key }}"
+        -n "{{ ansible_fqdn }}"
+        /etc/ssh/ssh_host_rsa_key.pub
+      args:
+        creates: /etc/ssh/ssh_host_rsa_key-cert.pub
 
   handlers:
 

@@ -1,0 +1,2 @@
+Defaults env_keep += SSH_ORIGINAL_COMMAND
+%sshca ALL = (sshca) NOPASSWD: /usr/local/bin/ssh-ca

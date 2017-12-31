@@ -3,7 +3,6 @@
 # ssh-ca
 
 . /etc/ssh-ca.conf
-umask 0007
 
 function log_debug() {
     echo "$(date "+%F %T") CALL ${*}" >> /var/log/ssh-ca/debug.log
@@ -11,10 +10,15 @@ function log_debug() {
     echo "$(date "+%F %T") OUTPUT ${output}" >> /var/log/ssh-ca/debug.log
 }
 
+function log_certificate() {
+    ssh-keygen -L -f "${cert}" >> /var/log/ssh-ca/signatures.log
+}
+
 function sign_user_key() {
     mkdir -p /tmp/ssh-ca
     principals="${SSH_ORIGINAL_COMMAND#* }"
     pubkey="$(mktemp /tmp/ssh-ca/${USER}_XXXXX.pub)"
+    cert="${pubkey%.pub}-cert.pub"
     cat > "${pubkey}"
     ca_key="/usr/local/lib/ssh-ca/${SSH_CA_KEY}"
     serial="$(date +%s)"
@@ -31,15 +35,17 @@ function sign_user_key() {
         -n "${principals}" \
         -z "${serial}" \
         "${pubkey}"
-    cat "${pubkey%.pub}-cert.pub"
+    log_certificate
+    cat "${cert}"
     rm "${pubkey}"
-    rm "${pubkey%.pub}-cert.pub"
+    rm "${cert}"
 }
 
 function sign_host_key() {
     mkdir -p /tmp/ssh-ca
     principals="${SSH_ORIGINAL_COMMAND#* }"
     pubkey="$(mktemp /tmp/ssh-ca/${USER}_XXXXX.pub)"
+    cert="${pubkey%.pub}-cert.pub"
     cat > "${pubkey}"
     ca_key="/usr/local/lib/ssh-ca/${SSH_CA_KEY}"
     validity="+365d"
@@ -51,11 +57,13 @@ function sign_host_key() {
         -V "${validity}" \
         -n "${principals}" \
         "${pubkey}"
-    cat "${pubkey%.pub}-cert.pub"
+    cat "${cert}"
+    log_certificate
     rm "${pubkey}"
-    rm "${pubkey%.pub}-cert.pub"
+    rm "${cert}"
 }
 
+echo "SSH_ORIGINAL_COMMAND=${SSH_ORIGINAL_COMMAND}" >> /var/log/ssh-ca/debug.log
 subcommand=${SSH_ORIGINAL_COMMAND% *}
 case "${subcommand}" in
     user)
