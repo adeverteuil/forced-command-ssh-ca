@@ -1,8 +1,10 @@
 ---
 - hosts: ssh-ca
+
   vars_files:
     - vars.yml
     - vault.yml
+
   tasks:
 
   - name: activate NTP
@@ -62,3 +64,10 @@
       content: "{{ item.public }}"
       dest: /root/ssh-ca/ca-{{ item.name }}.pub
     with_items: "{{ ssh_ca_keypairs }}"
+
+  handlers:
+
+    - name: restart sshd
+      service:
+        name: sshd
+        state: restarted
