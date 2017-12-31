@@ -24,8 +24,8 @@ function log_certificate() {
 function sign_user_key() {
     mkdir -p /tmp/ssh-ca
     principals="${SSH_ORIGINAL_COMMAND#* }"
-    pubkey="$(mktemp /tmp/ssh-ca/${user_id}_XXXXX.pub)"
-    cert="${pubkey%.pub}-cert.pub"
+    pubkey="/tmp/ssh-ca/${run_id}.pub"
+    cert="/tmp/ssh-ca/${run_id}-cert.pub"
     cat > "${pubkey}"
     ca_key="/usr/local/lib/ssh-ca/${SSH_CA_KEY}"
     serial="$(date +%s)"
@@ -51,8 +51,8 @@ function sign_user_key() {
 function sign_host_key() {
     mkdir -p /tmp/ssh-ca
     principals="${SSH_ORIGINAL_COMMAND#* }"
-    pubkey="$(mktemp /tmp/ssh-ca/${user_id}_XXXXX.pub)"
-    cert="${pubkey%.pub}-cert.pub"
+    pubkey="/tmp/ssh-ca/${run_id}.pub"
+    cert="/tmp/ssh-ca/${run_id}-cert.pub"
     cat > "${pubkey}"
     ca_key="/usr/local/lib/ssh-ca/${SSH_CA_KEY}"
     validity="+365d"
