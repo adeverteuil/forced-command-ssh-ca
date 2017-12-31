@@ -1,2 +1,4 @@
-Defaults env_keep += SSH_ORIGINAL_COMMAND
-%sshca ALL = (sshca) NOPASSWD: /usr/local/bin/ssh-ca
+# Allow members of the sshca group to run /usr/local/bin/ssh-ca as the sshca user.
+# Preserve the SSH_ORIGINAL_COMMAND environment variable.
+Defaults!/usr/local/bin/ssh-ca env_keep += SSH_ORIGINAL_COMMAND
+%sshca ALL = (sshca) NOPASSWD: /usr/local/bin/ssh-ca ""
