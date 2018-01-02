@@ -26,7 +26,7 @@ function sign_user_key() {
     principals="${SSH_ORIGINAL_COMMAND#* }"
     pubkey="/tmp/ssh-ca/${run_id}.pub"
     cert="/tmp/ssh-ca/${run_id}-cert.pub"
-    cat > "${pubkey}"
+    dd bs=1K count=10 of="${pubkey}" 2>/dev/null
     ca_key="/usr/local/lib/ssh-ca/${SSH_CA_KEY}"
     serial="$(date +%s)"
     validity="${SSH_CA_CERTIFICATE_VALIDITY}"
@@ -53,7 +53,7 @@ function sign_host_key() {
     mkdir -p /tmp/ssh-ca
     pubkey="/tmp/ssh-ca/${run_id}.pub"
     cert="/tmp/ssh-ca/${run_id}-cert.pub"
-    cat > "${pubkey}"
+    dd bs=1K count=10 of="${pubkey}" 2>/dev/null
     ca_key="/usr/local/lib/ssh-ca/${SSH_CA_KEY}"
     validity="+365d"
     log_output ssh-keygen \
