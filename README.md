@@ -131,11 +131,11 @@ root access to the SSH servers of the `ssh-ca` host group. They are
 masters of the CA and must be trusted.
 
 
-SSH CA administration
-=====================
+SSH CA administration tasks
+===========================
 
-How to remove a user's key
---------------------------
+Remove a user's key
+-------------------
 
 Do not remove a user's SSH key by deleting its item from the list. This
 will simply stop Ansible from managing this key and would leave it
@@ -144,8 +144,8 @@ present on the CA server. Rather, add the "state:" key with the value
 remove the SSH key from the user's authorized\_keys file.
 
 
-How to create CA keypairs
--------------------------
+Create CA keypairs
+------------------
 
 On your workstation, use `ssh-keygen` to generate a keypair.
 
