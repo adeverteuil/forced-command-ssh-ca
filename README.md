@@ -152,9 +152,9 @@ On your workstation, use `ssh-keygen` to generate a keypair.
     ssh-keygen -C my-ca-01 -f my-ca-01
 
 <dl>
-<dt>`-C my-ca-01`</dt>
+<dt><code>-C my-ca-01</code></dt>
 <dd>Set the key's comment to "my-ca-01". By convention, 01 is the key's sequence number. Thus you can provision multiple keys in advance to facilitate key rotation.</dd>
-<dt>`-f my-ca-01`</dt>
+<dt><code>-f my-ca-01</code></dt>
 <dd>Provide the output filename. The public part will have `.pub` appended to the name.</dd>
 </dl>
 
