@@ -172,3 +172,9 @@ Instruct your users to add the certificate authority key to their
 For example:
 
     @cert-authority * ssh-rsa AAAAB3NzaC1y ..... WcS60D my-ca-01
+
+
+Rotate host certificates
+------------------------
+
+Host certificates have a 1 year validity. To renew them, `rm /etc/ssh/ssh_host_*_key-cert.pub` and run the playbook again.
