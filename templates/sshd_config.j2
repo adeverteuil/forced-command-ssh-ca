@@ -75,7 +75,7 @@ Subsystem sftp /usr/lib/openssh/sftp-server
 UsePAM yes
 
 # Any non-root users are CA users which can only use the SSH server to sign SSH certificates.
-Match User !root,*
+Match User !root,!ubuntu,*
     ForceCommand /usr/bin/sudo -u sshca /usr/local/bin/ssh-ca
     AllowAgentForwarding no
     AllowTcpForwarding no
