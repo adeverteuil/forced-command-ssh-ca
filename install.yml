@@ -15,6 +15,7 @@
       user:
         name: sshca
         system: yes
+        createhome: no
 
     - name: create users
       user:
@@ -72,7 +73,7 @@
         state: directory
         owner: sshca
         group: sshca
-        mode: 0750
+        mode: 0700
 
     - name: install CA secret keys
       copy:
