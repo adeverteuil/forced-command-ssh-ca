@@ -4,8 +4,8 @@ ForceCommand SSH CA
 A self-serve automated SSH CA implemented as an SSH forced command.
 
 
-Setting up
-==========
+CA administrator set up
+=======================
 
 Before you can manage the SSH CA, you must perform a few preparation steps.
 
@@ -14,32 +14,34 @@ Inventory
 ---------
 
 The inventory directory should be organized in a different repository because
-this repository is open sourced.
+this repository is open sourced and will be version controlled separately.
 
-In the repository's root directory, create a symbolic link named "inventory"
+In this repository's root directory, create a symbolic link named "inventory"
 pointing to your inventory file or directory.
 
     ln -s ../ssh-ca-inventory inventory
 
-The CA will be installed on `ssh-ca` host group.
+The CA will be installed on `ssh-ca` host group. The "inventory"
+file/link is not tracked by Git.
 
 
 Variables
 ---------
 
 The vars.template.yml file is provided as documentation-by-example for the
-Ansible variables that must be defined.
+Ansible variables that must be defined in your inventory.
 
 
 Ansible Vault password
 ----------------------
 
 If some of your variables are in an Ansible Vault, write the Vault
-password in the `.ansible-vault-password.txt` file at the root of the
-repository. This file is not tracked by Git.
+password in the `.ansible-vault-password.txt` file at the root of this
+repository. This file is not tracked by Git and is referred to from the
+supplied `ansible.cfg` configuration file.
 
 The CA system administrators are those that have the Vault password and
-have root access to the SSH servers of the `ssh-ca` host group. They are
+root access to the SSH servers of the `ssh-ca` host group. They are
 masters of the CA and must be trusted.
 
 
@@ -56,25 +58,34 @@ present on the CA server. Rather, add the "state:" key with the value
 remove the SSH key from the user's authorized\_keys file.
 
 
-How to create SSH keypairs for the `ssh_ca_keypairs` variable
--------------------------------------------------------------
+How to create CA keypairs
+-------------------------
 
 On your workstation, use `ssh-keygen` to generate a keypair.
 
     ssh-keygen -C my-ca-01 -f my-ca-01
-  
-    -C my-ca-01
-        Set the key's comment to "my-ca-01".
-        By convention, 01 is the key's sequence number. Thus you can provision multiple
-        keys in advance to facilitate key rotation.
-    -f
-        Provide the output filename. The public part will have .pub appended to the name.
 
-Then copy the content of the files to the secret and public keys of a new list item.
+<dl>
+<dt>`-C my-ca-01`</dt>
+<dd>Set the key's comment to "my-ca-01". By convention, 01 is the key's sequence number. Thus you can provision multiple keys in advance to facilitate key rotation.</dd>
+<dt>`-f my-ca-01`</dt>
+<dd>Provide the output filename. The public part will have `.pub` appended to the name.</dd>
+</dl>
+
+Then copy the content of the secret and public key files in a new `ssh_ca_keypairs` list item.
 
 
 Publish the CA public key for user's known hosts
 ------------------------------------------------
+
+Instruct your users to add the certificate authority key to their
+`known_hosts` file. The format of the line is:
+
+    @cert-authority * keytype base64-encoded-key comment
+
+For example:
+
+    @cert-authority * ssh-rsa AAAAB3NzaC1y ..... WcS60D my-ca-01
 
 
 Design
