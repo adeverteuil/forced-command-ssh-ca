@@ -51,7 +51,6 @@ function sign_user_key() {
 
 function sign_host_key() {
     mkdir -p /tmp/ssh-ca
-    principals="${SSH_ORIGINAL_COMMAND#* }"
     pubkey="/tmp/ssh-ca/${run_id}.pub"
     cert="/tmp/ssh-ca/${run_id}-cert.pub"
     cat > "${pubkey}"
@@ -63,7 +62,6 @@ function sign_host_key() {
         -h \
         -I "${SSH_CA_KEY}" \
         -V "${validity}" \
-        -n "${principals}" \
         "${pubkey}"
     cat "${cert}"
     log_certificate

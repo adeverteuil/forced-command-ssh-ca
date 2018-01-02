@@ -106,6 +106,7 @@
       command: sed -n '/^HostKey/s/^HostKey *//p' /etc/ssh/sshd_config
       register: host_keys
       check_mode: no
+      changed_when: no
 
     - name: sign the host keys
       command: ssh-keygen -s "/usr/local/lib/ssh-ca/{{ ssh_ca_configuration.use_ca_key }}"
@@ -113,7 +114,6 @@
         -P ""
         -I "{{ ssh_ca_configuration.use_ca_key }}"
         -V "-1h:+365d"
-        -n "{{ ansible_fqdn }}"
         "{{ item }}.pub"
       args:
         creates: "{{ item }}-cert.pub"
