@@ -17,39 +17,11 @@
         system: yes
         createhome: no
 
-    - name: create users
-      user:
-        name: "{{ item.name }}"
-        comment: "{{ item.comment|default(omit) }}"
-        groups: sshca
-        state: "{{ item.state|default(omit) }}"
-      with_items: "{{ ssh_ca_users }}"
-
-    - name: provision authorized SSH keys for users
-      authorized_key:
-        user: "{{ item.0.name }}"
-        key: "{{ item.1.key }}"
-        state: "{{ item.1.state|default('present') }}"
-      with_subelements:
-        - "{{ ssh_ca_users }}"
-        - ssh_keys
-      when: item.0.state|default("present") == "present"
-
     - name: add the sshca group to the sudoers for the forced command
       copy:
         src: sudoers-sshca
         dest: /etc/sudoers.d/sshca
         mode: 0440
-
-    - name: provision superuser SSH keys
-      authorized_key:
-        user: "{{ ansible_user }}"
-        key: "{{ item.1.key }}"
-        state: "{{ item.state|default('present') }}"
-      with_subelements:
-        - "{{ ssh_ca_users }}"
-        - ssh_keys
-      when: item.0.superuser|default(False)
 
     - name: install ssh-ca
       copy:
