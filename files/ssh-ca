@@ -48,7 +48,7 @@ function sign_key() {
     cert="/tmp/ssh-ca/${run_id}-cert.pub"
 
     # Expect a public key on stdin
-    dd bs=1K count=10 of="${pubkey}" 2>/dev/null
+    dd bs=1K count=10 of="${pubkey}" status=none
     log_output ssh-keygen -l -f "${pubkey}"
     rc=$?
     if [ ${rc} -gt 0 ]; then
