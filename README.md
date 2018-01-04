@@ -37,6 +37,10 @@ When the command parameters contain an SSH certificate signature
 subcommand, a public key is expected on standard input then an SSH
 certificate is written to standard output and the connection is closed.
 
+Here's an overview of the call chain:
+
+    ssh-csr → ssh → sshd → sudo → ssh-ca → ssh-keygen
+
 
 Functions of the Ansible playbook
 ---------------------------------
