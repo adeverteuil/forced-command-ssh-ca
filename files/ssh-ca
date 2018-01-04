@@ -63,10 +63,12 @@ function sign_key() {
     principals="${arguments[1]}"
     if [ "${arguments[0]}" = "user" ]; then
         validity="${SSH_CA_CERTIFICATE_VALIDITY}"
+        identity="${user_id}"
         options="${SSH_CA_CERTIFICATE_OPTIONS}"
         host_cert=""
     else
         validity="+365d"
+        identity="CA=${SSH_CA_KEY} REQUESTOR=${user_id}"
         options=""
         host_cert="-h"
     fi
@@ -81,9 +83,9 @@ function sign_key() {
     # Actual signature happens here
     log_output ssh-keygen \
         -P "" \
-        -s "/usr/local/lib/ssh-ca/${SSH_CA_KEY}" \
+        -s "${ca_key}" \
         ${host_cert} \
-        -I "${user_id}" \
+        -I "${identity}" \
         -V "${validity}"${options} \
         -n "${principals}" \
         -z "${serial}" \

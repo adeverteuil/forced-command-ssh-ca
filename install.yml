@@ -90,6 +90,8 @@
         -P ""
         -I "{{ ssh_ca_configuration.use_ca_key }}"
         -V "-1h:+365d"
+        -n "{{ ansible_eth0.ipv4.address }},{{ ansible_fqdn }}"
+        -z "{{ ansible_date_time.epoch }}"
         "{{ item }}.pub"
       args:
         creates: "{{ item }}-cert.pub"
