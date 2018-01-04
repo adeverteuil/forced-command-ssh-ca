@@ -16,7 +16,7 @@ A self-serve automated SSH CA implemented as an SSH forced command.
 > GNU Affero General Public License for more details.
 > 
 > You should have received a copy of the GNU Affero General Public License
-> along with this program. If not, see [](http://www.gnu.org/licenses/).
+> along with this program. If not, see [http://www.gnu.org/licenses/](http://www.gnu.org/licenses/).
 
 
 Design
@@ -24,7 +24,7 @@ Design
 
 This CA is made by a Linux system administrator for Linux system
 administrators. It leverages facilities of a mostly vanilla Debian/Ubuntu
-system to reduce on programming and maintenance.
+operating system to reduce on programming and maintenance effort.
 
 The user doesn't invoke `ssh-ca` directly. When an ssh connection
 is established to the server and the client authenticates as a user
@@ -39,13 +39,13 @@ certificate is written to standard output and the connection is closed.
 
 Here's an overview of the call chain:
 
-    ssh-csr → ssh → sshd → sudo → ssh-ca → ssh-keygen
+`ssh-csr` → `ssh` → `sshd` → `sudo` → `ssh-ca` → `ssh-keygen`
 
 
 Functions of the Ansible playbook
 ---------------------------------
 
- * Create user accounts (regular Unix users) with their `authorized_keys` 
+ * Create user accounts (regular Unix users) with their `authorized_keys`  
    All users except root have a `ForceCommand`
  * Create the `sshca` user
  * Install `/usr/local/bin/ssh-ca`
@@ -133,8 +133,8 @@ file/link is not tracked by Git.
 Variables
 ---------
 
-The vars.template.yml file is provided as documentation-by-example for the
-Ansible variables that must be defined in your inventory.
+The `vars.template.yml` file is provided as documentation-by-example for
+the Ansible variables that must be defined in your inventory.
 
 
 Ansible Vault password
@@ -196,4 +196,6 @@ For example:
 Rotate host certificates
 ------------------------
 
-Host certificates have a 1 year validity. To renew them, `rm /etc/ssh/ssh_host_*_key-cert.pub` and run the playbook again.
+Host certificates have a 1 year validity. To renew them,
+`rm /etc/ssh/ssh_host_*_key-cert.pub` and run the playbook
+again.
