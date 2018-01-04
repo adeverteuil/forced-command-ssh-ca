@@ -25,7 +25,9 @@ run_id="$(uuid)"
 user_id="${SUDO_USER:-$USER}"
 
 function log_debug() {
-    echo "$(date "+%F %T") ${run_id} ${*}" >> /var/log/ssh-ca/debug.log
+    flock /var/log/ssh-ca/debug.log \
+        echo "$(date "+%F %T") ${run_id} ${*}" \
+        >> /var/log/ssh-ca/debug.log
 }
 
 function log_output() {
@@ -38,7 +40,10 @@ function log_output() {
 }
 
 function log_certificate() {
-    cat "${cert}" >> /var/log/ssh-ca/certificates.log
+    flock /var/log/ssh-ca/certificates.log \
+        dd oflag=append conv=notrunc status=none \
+           if="${cert}" \
+           of=/var/log/ssh-ca/certificates.log
 }
 
 function sign_key() {
