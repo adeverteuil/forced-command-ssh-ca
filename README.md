@@ -1,5 +1,5 @@
-ForceCommand SSH CA
-===================
+Forced Command SSH CA
+=====================
 
 A self-serve automated SSH CA implemented as an SSH forced command.
 
