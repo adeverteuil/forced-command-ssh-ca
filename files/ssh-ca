@@ -150,7 +150,7 @@ function print_usage() {
     echo "SSH_CA_CERTIFICATE_OPTIONS=$SSH_CA_CERTIFICATE_OPTIONS"
 }
 
-log_debug "SSH_ORIGINAL_COMMAND ${SSH_ORIGINAL_COMMAND}"
+log_debug "SSH_ORIGINAL_COMMAND \"${SSH_ORIGINAL_COMMAND}\""
 read -a arguments <<< "${SSH_ORIGINAL_COMMAND}"
 case "${arguments[0]}" in
     user|host)
