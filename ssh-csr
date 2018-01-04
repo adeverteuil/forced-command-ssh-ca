@@ -2,14 +2,31 @@
 #
 # ssh-csr 1.0
 #
-#     A client program for forced-command-ssh-ca.
+# Licence and copyright
 #
-#     ssh-csr establishes an SSH session with ssh-ca, specifies the
-#     request is for a user certificate and what principals the
-#     request is for, sends the public key from the file specified in
-#     the SSH_CSR_IDENTITY environment variable, receives a signed
-#     certificate valid for the requested principals, and writes it in a
-#     file with the -cert.pub suffix.
+#     This file is part of forced-command-ssh-ca, a self-serve automated SSH
+#     certificate authority implemented as an SSH forced command
+#     Copyright (C) 2018  Alexandre de Verteuil
+#
+#     This program is free software: you can redistribute it and/or modify
+#     it under the terms of the GNU Affero General Public License as published
+#     by the Free Software Foundation, either version 3 of the License, or
+#     (at your option) any later version.
+#
+#     This program is distributed in the hope that it will be useful,
+#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#     GNU Affero General Public License for more details.
+#
+#     You should have received a copy of the GNU Affero General Public License
+#     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ssh-csr establishes an SSH session with ssh-ca, specifies the
+# request is for a user certificate and what principals the
+# request is for, sends the public key from the file specified in
+# the SSH_CSR_IDENTITY environment variable, receives a signed
+# certificate valid for the requested principals, and writes it in a
+# file with the -cert.pub suffix.
 #
 # How to use
 #

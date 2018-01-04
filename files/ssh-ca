@@ -1,6 +1,23 @@
 #!/bin/bash
 #
 # ssh-ca
+#
+# This file is part of forced-command-ssh-ca, a self-serve automated SSH
+# certificate authority implemented as an SSH forced command
+# Copyright (C) 2018  Alexandre de Verteuil
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published
+# by the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 . /etc/ssh-ca.conf
 
@@ -86,6 +103,53 @@ function sign_key() {
     fi
 }
 
+function print_licence() {
+    echo "This is forced-command-ssh-ca, a self-serve automated SSH"
+    echo "certificate authority implemented as an SSH forced command"
+    echo "Copyright (C) 2018  Alexandre de Verteuil"
+    echo ""
+    echo "This program is free software: you can redistribute it and/or modify"
+    echo "it under the terms of the GNU Affero General Public License as published"
+    echo "by the Free Software Foundation, either version 3 of the License, or"
+    echo "(at your option) any later version."
+    echo ""
+    echo "This program is distributed in the hope that it will be useful,"
+    echo "but WITHOUT ANY WARRANTY; without even the implied warranty of"
+    echo "MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the"
+    echo "GNU Affero General Public License for more details."
+    echo ""
+    echo "You should have received a copy of the GNU Affero General Public License"
+    echo "along with this program.  If not, see <http://www.gnu.org/licenses/>."
+    echo ""
+    echo "The source code is available at"
+    echo "https://github.com/adeverteuil/forced-command-ssh-ca"
+}
+
+function print_usage() {
+    echo "Forced Command SSH CA"
+    echo "Copyright (C) 2018  Alexandre de Verteuil"
+    echo ""
+    echo "Usage:"
+    echo "    host PRINCIPALS"
+    echo "                     Sign a host certificate"
+    echo "    user PRINCIPALS"
+    echo "                     Sign a user certificate"
+    echo "    PRINCIPALS is a mandatory comma-separated list of principals"
+    echo "               to include in the signed certificate"
+    echo "    report"
+    echo "            Print the list of all certificates ever signed"
+    echo "            Example report details on the last 10 certificates:"
+    echo "            $ ssh ssh-ca report | ssh-keygen -L -f <(tail)"
+    echo "    licence"
+    echo "            Print licencing information about this free software"
+    echo ""
+    echo "COMMAND=$SSH_ORIGINAL_COMMAND"
+    echo "USER=$user_id"
+    echo "SSH_CA_KEY=$SSH_CA_KEY"
+    echo "SSH_CA_CERTIFICATE_VALIDITY=$SSH_CA_CERTIFICATE_VALIDITY"
+    echo "SSH_CA_CERTIFICATE_OPTIONS=$SSH_CA_CERTIFICATE_OPTIONS"
+}
+
 log_debug "SSH_ORIGINAL_COMMAND ${SSH_ORIGINAL_COMMAND}"
 read -a arguments <<< "${SSH_ORIGINAL_COMMAND}"
 case "${arguments[0]}" in
@@ -95,23 +159,10 @@ case "${arguments[0]}" in
     report)
         cat "/var/log/ssh-ca/certificates.log"
         ;;
+    licence)
+        print_licence
+        ;;
     *)
-        echo Usage:
-        echo "    host PRINCIPALS"
-        echo "                     Sign a host certificate"
-        echo "    user PRINCIPALS"
-        echo "                     Sign a user certificate"
-        echo "    PRINCIPALS is a mandatory comma-separated list of principals"
-        echo "               to include in the signed certificate"
-        echo "    report"
-        echo "            Print the list of all certificates ever signed"
-        echo "            Example report details on the last 10 certificates:"
-        echo "            $ ssh ssh-ca report | ssh-keygen -L -f <(tail)"
-        echo ""
-        echo "COMMAND=$SSH_ORIGINAL_COMMAND"
-        echo "USER=$user_id"
-        echo "SSH_CA_KEY=$SSH_CA_KEY"
-        echo "SSH_CA_CERTIFICATE_VALIDITY=$SSH_CA_CERTIFICATE_VALIDITY"
-        echo "SSH_CA_CERTIFICATE_OPTIONS=$SSH_CA_CERTIFICATE_OPTIONS"
+        print_usage
         ;;
 esac
