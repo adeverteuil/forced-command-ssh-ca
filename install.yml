@@ -70,6 +70,16 @@
       with_items: "{{ ssh_ca_keypairs }}"
       no_log: True
 
+    - name: stat the key specified in ssh_ca_configuration.use_ca_key
+      stat:
+        path: /usr/local/lib/ssh-ca/{{ ssh_ca_configuration.use_ca_key }}
+      register: stat_key
+
+    - name: assert that use_ca_key is set to the name of an ssh_ca_keypairs item
+      assert:
+        that: stat_key.stat.exists
+        msg: "{{ ssh_ca_configuration.use_ca_key }} is not a key defined in ssh_ca_keypairs"
+
     - name: create the log directory
       file:
         dest: /var/log/ssh-ca
