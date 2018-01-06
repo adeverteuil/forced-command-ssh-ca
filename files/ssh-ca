@@ -72,7 +72,7 @@ function sign_key() {
         options="${SSH_CA_CERTIFICATE_OPTIONS}"
         host_cert=""
     else
-        validity="+365d"
+        validity="-10m:+365d"
         identity="CA=${SSH_CA_KEY} REQUESTOR=${user_id}"
         options=""
         host_cert="-h"
