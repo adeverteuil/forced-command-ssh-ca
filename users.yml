@@ -25,8 +25,7 @@
       authorized_key:
         user: "{{ ansible_user }}"
         key: "{{ item.1.key }}"
-        state: "{{ item.state|default('present') }}"
+        state: "{% if item.0.state|default('present') == 'present' and item.0.superuser|default(False) and item.1.state|default('present') == 'present' %}present{% else %}absent{% endif %}"
       with_subelements:
         - "{{ ssh_ca_users }}"
         - ssh_keys
-      when: item.0.superuser|default(False)
