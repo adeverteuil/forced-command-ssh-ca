@@ -4,17 +4,17 @@ Forced Command SSH CA
 A self-serve automated SSH CA implemented as an SSH forced command.
 
 > Copyright © 2018 Alexandre de Verteuil
-> 
+>
 > This program is free software: you can redistribute it and/or modify
 > it under the terms of the **GNU Affero General Public License** as published
 > by the Free Software Foundation, either version 3 of the License, or
 > (at your option) any later version.
-> 
+>
 > This program is distributed in the hope that it will be useful,
 > but WITHOUT ANY WARRANTY; without even the implied warranty of
 > MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 > GNU Affero General Public License for more details.
-> 
+>
 > You should have received a copy of the GNU Affero General Public License
 > along with this program. If not, see [http://www.gnu.org/licenses/](http://www.gnu.org/licenses/).
 
@@ -199,3 +199,154 @@ Rotate host certificates
 Host certificates have a 1 year validity. To renew them,
 `rm /etc/ssh/ssh_host_*_key-cert.pub` and run the playbook
 again.
+
+
+FreeIPA Integration
+===================
+
+Forced Command SSH CA can be configured with FreeIPA integration for
+user authentication with SSH public key authentication. In this case,
+sudo rules and Host Based Access Control must be carefully planned to
+limit access to the public key for regular users.
+
+
+Joining the FreeIPA domain
+--------------------------
+
+I tested this on a Ubuntu 14.04 ipa client with two CentOS 7 ipa servers.
+
+Install FreeIPA client
+
+    aptitude install freeipa-client
+
+Update the nameservers configured in /etc/network/interfaces to point
+to the IPA nameservers. Assuming that DNS service is enabled on the ipa
+servers, this will enable service discovery.
+
+    ipa-client-install --mkhomedir --no-sshd
+
+Note: The `--mkhomedir` option can be set but it doesn't seem to enable
+PAM's mkhomedir module. There is a task in `install.yml` that takes care
+of that.
+
+add sudo to the list of sssd services in `/etc/sssd/sssd.conf`:
+
+    services = nss, pam, ssh, sudo
+
+Remove any unneeded keys from `/root/.ssh/authorized_keys`, especially
+if your provisioning infrastructure automatically inserts the CA key. It
+is nonsensical to authorize `ssh-ca-u to login as root on any host in
+the FreeIPA domain!
+
+
+Administration credentials
+--------------------------
+
+When FreeIPA integration is used, CA administrators no longer connect
+to the server with the `root` user. Rather, they should have a separate
+user in the `ssh-ca-admins` group. For example, I have an `adeverteuil`
+user in the `ssh-ca-users` group and an `adeverteuil-admin` user in the
+`ssh-ca-admins` group.
+
+Then I run the `install.yml` playbook with the following options:
+
+    ap install.yml -u adeverteuil-admin -b --become-user root
+
+
+FreeIPA sudo rules
+------------------
+
+    -sh-4.2$ ipa sudocmd-show '/usr/local/bin/ssh-ca ""'
+      Sudo Command: /usr/local/bin/ssh-ca ""
+      Description: forcedcommand-ssh-ca
+
+    -sh-4.2$ ipa sudorule-show forcedcommand-ssh-ca
+      Rule name: forcedcommand-ssh-ca
+      Enabled: TRUE
+      User Groups: ssh-ca-users
+      Host Groups: ssh-ca
+      Sudo Allow Commands: /usr/local/bin/ssh-ca ""
+      RunAs External User: sshca
+      Sudo Option: !authenticate, env_keep+=SSH_ORIGINAL_COMMAND
+
+
+FreeIPA users
+-------------
+
+This is my regular user. It is a indirect member of the `ssh-ca-users`
+group. For demonstration purposes I removed some irrelevant details.
+
+    -sh-4.2$ ipa user-show adeverteuil
+      User login: adeverteuil
+      First name: Alexandre
+      Last name: de Verteuil
+      Home directory: /home/adeverteuil
+      Login shell: /bin/sh
+      Principal name: adeverteuil@SC.IWEB.COM
+      Principal alias: adeverteuil@SC.IWEB.COM
+      Email address: adeverteuil@inap.com
+      UID: 1440900000
+      GID: 1440900000
+      SSH public key fingerprint: SHA256:hAJ0lT9FR85x+3IUyv6hLtv0bJSOc/1mWPXEGyAxPy0 adeverteuil@home-pc (ssh-rsa),
+                                  SHA256:IpS5f34ur5ETLATde6kcX0SXSeOl3u4+e9XS8w2oiJo adeverteuil@home-laptop (ssh-rsa),
+                                  SHA256:bh/6eKMulLfWwdrfR+S9OegfNjHiHeEoa3tFzpRq4bQ adeverteuil@work-laptop (ssh-rsa)
+      Account disabled: False
+      Password: True
+      Member of groups: ipausers, ssh-ca-users
+      Indirect Member of Sudo rule: forcedcommand-ssh-ca
+      Indirect Member of HBAC rule: ssh certificate authority
+      Kerberos keys available: True
+
+This is my admin user. It's a good practice to have a privileged
+user account for administrative work and a regular user account for
+day-to-day work. In this case, it is mandatory because any user in the
+`ssh-ca-users` group will never be able to get a shell via SSH due to
+the ForceCommand.
+
+In this case, the user is member of the `ssh-ca-admins` group.
+
+    -sh-4.2$ ipa user-show adeverteuil-admin
+      User login: adeverteuil-admin
+      First name: Alexandre
+      Last name: de Verteuil
+      Home directory: /home/adeverteuil-admin
+      Login shell: /bin/sh
+      Principal name: adeverteuil-admin@SC.IWEB.COM
+      Principal alias: adeverteuil-admin@SC.IWEB.COM
+      Email address: adeverteuil-admin@sc.iweb.com
+      UID: 1440900008
+      GID: 1440900008
+      SSH public key fingerprint: SHA256:bh/6eKMulLfWwdrfR+S9OegfNjHiHeEoa3tFzpRq4bQ adeverteuil@work-laptop (ssh-rsa)
+      Account disabled: False
+      Password: True
+      Member of groups: ipausers, ssh-ca-admins, admins
+      Indirect Member of Sudo rule: sc-infra-admin sudo on SC infrastructure
+      Indirect Member of HBAC rule: ssh-ca-administration, sc-infra-admins
+      Kerberos keys available: True
+
+
+FreeIPA HBAC
+------------
+
+It is important to disable the default `allow_all` HBAC rule.
+
+This new rule allows members of the `ssh-ca-admins` group to ssh into the CA server.
+
+    -sh-4.2$ ipa hbacrule-show ssh-ca-administration
+      Rule name: ssh-ca-administration
+      Description: Members of ssh-ca-admins get shell access on the CA servers. Users of this group should not be members of ssh-ca-users, otherwise the ssh ForceCommand will be in effect and prevent ssh-ca-admins
+                   from getting a ssh terminal.
+      Enabled: TRUE
+      User Groups: ssh-ca-admins
+      Host Groups: ssh-ca
+      Services: login, sshd
+      Service Groups: Sudo
+
+This also grants ssh access to the `ssh-ca-users` group, and the ForceCommand in `sshd_config` is enforced on this group name.
+
+    -sh-4.2$ ipa hbacrule-show "ssh certificate authority"
+      Rule name: ssh certificate authority
+      Enabled: TRUE
+      User Groups: ssh-ca-users
+      Host Groups: ssh-ca
+      Services: sshd
