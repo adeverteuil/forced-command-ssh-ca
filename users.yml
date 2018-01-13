@@ -3,11 +3,22 @@
 
   tasks:
 
+    - name: add the ssh-ca-users group to the sudoers for the forced command
+      copy:
+        src: sudoers-sshca
+        dest: /etc/sudoers.d/sshca
+        mode: 0440
+
+    - name: create the ssh-ca-users group
+      group:
+        name: ssh-ca-users
+        state: present
+
     - name: create users
       user:
         name: "{{ item.name }}"
         comment: "{{ item.comment|default(omit) }}"
-        groups: sshca
+        groups: ssh-ca-users
         state: "{{ item.state|default(omit) }}"
       with_items: "{{ ssh_ca_users }}"
 

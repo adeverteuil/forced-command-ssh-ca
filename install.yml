@@ -17,12 +17,6 @@
         system: yes
         createhome: no
 
-    - name: add the sshca group to the sudoers for the forced command
-      copy:
-        src: sudoers-sshca
-        dest: /etc/sudoers.d/sshca
-        mode: 0440
-
     - name: install ssh-ca
       copy:
         src: ssh-ca
