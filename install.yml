@@ -94,7 +94,7 @@
         -P ""
         -I "{{ ssh_ca_configuration.use_ca_key }}"
         -V "-1h:+365d"
-        -n "{{ ansible_eth0.ipv4.address }},{{ ansible_fqdn }}"
+        -n "{{ ansible_eth0.ipv4.address }},{{ ansible_fqdn }}{% for principal in ssh_ca_configuration.additional_host_principals|default([]) %},{{ principal }}{% endfor %}"
         -z "{{ ansible_date_time.epoch }}"
         "{{ item }}.pub"
       args:

@@ -32,3 +32,7 @@ ssh_ca_configuration:
   certificate_options:  # Options to add to the signed certificates, if any
     - no-port-forwarding
     - source-address=1.2.3.4/24,5.6.7.8/24
+  additional_host_principals: []
+    # Optional list of additional principal to include in the host
+    # certificates in case the hostname is different from the DNS name
+    # used to connect to the ssh-ca.
