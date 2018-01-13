@@ -206,14 +206,18 @@ FreeIPA Integration
 
 Forced Command SSH CA can be configured with FreeIPA integration for
 user authentication with SSH public key authentication. In this case,
-sudo rules and Host Based Access Control must be carefully planned to
-limit access to the public key for regular users.
+centralized sudo rules and Host Based Access Control must be carefully
+planned to limit access to the public key for regular users.
+
+I suggest joining the CA server to the ipa domain and setting
+`ssh_ca_configuration.freeipa_integration` to `yes` in host variables
+**before** running the `install.yml` playbook.
+
+I tested this on a Ubuntu 14.04 ipa client with two CentOS 7 ipa servers.
 
 
 Joining the FreeIPA domain
 --------------------------
-
-I tested this on a Ubuntu 14.04 ipa client with two CentOS 7 ipa servers.
 
 Install FreeIPA client
 
