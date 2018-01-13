@@ -8,6 +8,7 @@
         src: sudoers-sshca
         dest: /etc/sudoers.d/sshca
         mode: 0440
+        state: "{% if ssh_ca_configuration.freeipa_integration %}absent{% else %}present{% endif %}"
 
     - name: create the ssh-ca-users group
       group:

@@ -102,6 +102,13 @@
       with_items: "{{ host_keys.stdout_lines }}"
       notify: restart ssh
 
+    # https://help.ubuntu.com/lts/serverguide/sssd-ad.html#sssd-ad-mkhomedir
+    - name: Add pam mkhomedir module for external (ipa) users
+      lineinfile:
+        dest: /etc/pam.d/common-session
+        line: session    required    pam_mkhomedir.so skel=/etc/skel/ umask=0022
+        insertafter: 'session required pam_unix\.so'
+
   handlers:
 
     - name: restart ssh
