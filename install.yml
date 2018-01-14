@@ -109,6 +109,12 @@
         line: session    required    pam_mkhomedir.so skel=/etc/skel/ umask=0022
         insertafter: 'session required pam_unix\.so'
 
+    - name: put ASCII art in the motd
+      copy:
+        src: ssh-ca.motd
+        dest: /etc/update-motd.d/99-forced-command-ssh-ca
+        mode: 0755
+
   handlers:
 
     - name: restart ssh
