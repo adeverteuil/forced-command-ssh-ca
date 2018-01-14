@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# ssh-csr 1.0
+# ssh-csr 1.1
 #
 # Licence and copyright
 #
@@ -82,6 +82,12 @@
 
 identity="${SSH_CSR_IDENTITY:-$HOME/.ssh/id_rsa.pub}"
 cert="${identity%.pub}-cert.pub"
+
+# Running ssh-csr without parameters prints the current certificate details
+if [ -z "${1}" ]; then
+    [ -r "${cert}" ] && ssh-keygen -L -f "${cert}"
+    exit
+fi
 
 output="$(ssh ssh-ca user "${1}" <"${identity}" 2>&1)"
 rc=$?
