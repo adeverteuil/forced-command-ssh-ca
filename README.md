@@ -239,8 +239,8 @@ add sudo to the list of sssd services in `/etc/sssd/sssd.conf`:
 
 Remove any unneeded keys from `/root/.ssh/authorized_keys`, especially
 if your provisioning infrastructure automatically inserts the CA key. It
-is nonsensical to authorize `ssh-ca-u to login as root on any host in
-the FreeIPA domain!
+is nonsensical to authorize `ssh-ca-users` to login as root on any host
+in the FreeIPA domain!
 
 
 Administration credentials
